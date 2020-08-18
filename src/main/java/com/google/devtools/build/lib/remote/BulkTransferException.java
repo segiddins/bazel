@@ -15,6 +15,7 @@ package com.google.devtools.build.lib.remote;
 
 import com.google.devtools.build.lib.remote.common.CacheNotFoundException;
 import java.io.IOException;
+import java.lang.StringBuilder;
 
 /**
  * Exception which represents a collection of IOExceptions for the purpose of distinguishing remote
@@ -45,5 +46,27 @@ class BulkTransferException extends IOException {
 
   boolean onlyCausedByCacheNotFoundException() {
     return allCacheNotFoundException;
+  }
+
+  public String getMessage() {
+    StringBuilder sb = new StringBuilder();
+    sb
+      .append(getClass().getSimpleName())
+      .append(":\n");
+    for (Throwable e : getSuppressed()) {
+      if (!(e instanceof IOException)) {
+        continue;
+      }
+      IOException suppressed = (IOException) e;
+
+      StringBuilder nested = new StringBuilder();
+      nested.
+        append(suppressed.toString());
+
+      sb.append("  - ").append(
+        nested.toString().replaceAll("^", "  ")
+      ).append("\n");
+    }
+    return sb.toString();
   }
 }
